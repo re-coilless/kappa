@@ -1,0 +1,25 @@
+<Entity name="gun_kid" >
+	<SpriteComponent 
+		_tags="kids_gun"
+		visible="1"
+		offset_x="0"
+		offset_y="0"
+		image_file="mods/kappa/debug_null.png"
+		z_index="0"
+		has_special_scale="0"
+	></SpriteComponent>
+	
+	<SpriteAnimatorComponent
+		rotate_to_surface_normal="0" 
+		target_sprite_comp_name="kids_gun"
+	></SpriteAnimatorComponent>
+	
+	<InheritTransformComponent
+		only_position="0"
+	></InheritTransformComponent>
+	
+	<LuaComponent
+		script_source_file="mods/kappa/kid_holder.lua"
+		execute_every_n_frame="1"
+	></LuaComponent>
+</Entity>

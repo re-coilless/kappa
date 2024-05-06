@@ -1,0 +1,158 @@
+<Entity name="kappa" tags="teleportable,kappaed">
+	<Base file="data/entities/base_enemy_flying.xml" >
+		<AnimalAIComponent 
+			_enabled="1" 
+			preferred_job="JobDefault"
+			escape_if_damaged_probability="100"
+			attack_melee_damage_min="0.4" 
+			attack_melee_damage_max="0.7"
+			creature_detection_range_x="400"
+			creature_detection_range_y="400"
+			creature_detection_angular_range_deg="60"
+			attack_melee_max_distance="20"
+			food_material="meat"
+			needs_food="0"
+			sense_creatures="1"
+			can_fly="1"  
+			attack_melee_enabled="1"
+			attack_landing_ranged_enabled="0"
+			attack_ranged_enabled="0"
+			attack_ranged_entity_file=""
+			aggressiveness_min="90"
+			aggressiveness_max="100"
+		></AnimalAIComponent>
+
+		<DamageModelComponent 
+			hp="4"
+			max_hp="4"
+			materials_create_messages="1"
+			fire_probability_of_ignition="5"
+			ragdoll_fx_forced="DISINTEGRATED"
+			ragdoll_material="rock_static_glow"
+			minimum_knockback_force="0"
+			physics_objects_damage="0"
+			><damage_multipliers
+				melee="1.0"
+				projectile="1.0"
+				explosion="1.0"
+				electricity="1.0"
+				ice="1.0"
+				fire="1.0"
+				drill="1.0"
+				explosion="0.35" 
+	  			holy="1.5"
+			></damage_multipliers>
+		</DamageModelComponent>
+
+		<SpriteComponent 
+			image_file="data/enemies_gfx/kappa.xml" 
+			emissive="0"
+			additive="0"
+			offset_x="6" 
+			offset_y="13"
+		></SpriteComponent>
+
+		<PathFindingComponent
+			can_jump="0"
+			can_fly="1" 
+			can_walk="0"
+			jump_speed="80"
+			initial_jump_lob="1"
+			initial_jump_max_distance_x="60"
+			initial_jump_max_distance_y="60"
+		></PathFindingComponent>
+
+		<PathFindingGridMarkerComponent
+			marker_work_flag="24"
+		></PathFindingGridMarkerComponent>
+
+		<GenomeDataComponent 
+			herd_id="player"
+			food_chain_rank="20"
+			is_predator="1"
+		></GenomeDataComponent>
+
+		<CharacterPlatformingComponent 
+			fly_speed_change_spd="0.8"
+			fly_velocity_x="28" 
+			accel_x="0.03" 
+			jump_velocity_y="-12" 
+			run_velocity="17"
+			keyboard_look="1"
+		></CharacterPlatformingComponent>
+
+		<HitboxComponent 
+			_enabled="1" 
+			aabb_max_x="3" 
+			aabb_max_y="3" 
+			aabb_min_x="-3" 
+			aabb_min_y="-14"
+		></HitboxComponent>
+
+		<AudioComponent
+			file="data/audio/Desktop/player.bank"
+			event_root="player"
+		></AudioComponent>
+	</Base>
+
+	<SpriteComponent 
+		alpha="1"
+		emissive="0"
+		image_file="data/particles/fog_of_war_hole_64.xml"
+		smooth_filtering="1"
+		fog_of_war_hole="1"
+	></SpriteComponent>
+
+	<LuaComponent
+		script_source_file="mods/kappa/remover.lua"
+		execute_every_n_frame="-1"
+		execute_on_removed="1"
+	></LuaComponent>
+	<LuaComponent
+		script_source_file="mods/kappa/kontroller.lua"
+		execute_every_n_frame="1"
+	></LuaComponent>
+
+	<LightComponent 
+		_enabled="1" 
+		radius="50"
+		fade_out_time="1.5"
+	></LightComponent>
+
+	<ItemPickUpperComponent
+		is_in_npc="1"
+		is_immune_to_kicks="1"
+	></ItemPickUpperComponent>
+
+	<StreamingKeepAliveComponent
+	></StreamingKeepAliveComponent>
+
+	<PlatformShooterPlayerComponent
+		eating_cells_per_frame="0"
+		eating_probability="0"
+		eating_delay_frames="999999999999"
+		eating_area_min="-9999999"
+		eating_area_max="-9999999"
+	></PlatformShooterPlayerComponent>
+
+	<VariableStorageComponent
+		name="kappa"
+		value_int="1"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="kappa_angle"
+		value_float="0"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="kappa_ranged_cooldown"
+		value_int="0"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="kappa_melee_cooldown"
+		value_int="0"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="kappa_current_gun"
+		value_int="1"
+	></VariableStorageComponent>
+</Entity>
