@@ -4,6 +4,9 @@ dofile_once( "mods/mnee/lib.lua" )
 local entity_id = GetUpdatedEntityID()
 local x, y, r, s_x, s_y = EntityGetTransform( entity_id )
 
+kick_tbl = kick_tbl or {}
+kick_tbl[entity_id] = kick_tbl[entity_id] or { 0, 0, 0, 0, 0 }
+
 local frame_num = GameGetFrameNum()
 local timer = ComponentGetValue2( GetUpdatedComponentID(), "mTimesExecuted" )
 
@@ -81,7 +84,7 @@ end
 
 
 local a_dist = 100
-local a_speed = math.rad( 1 )
+local a_speed = math.rad( ModSettingGetNextValue( "kappa.AIM_SPEED" ))
 local a_limit = math.rad( 85 )
 
 local aim_v,_,is_buttoned_v = mnee.mnin( "axis", {mod_id,"aim_v"}, {dirty=true})
@@ -260,9 +263,33 @@ if( ComponentGetValue2( ai_comp, "attack_melee_enabled" )) then
 			end
 		end
 		
+		local kick_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "KickComponent" )
+		if(( kick_tbl[entity_id][1] + 5 ) < frame_num and kick_comp ~= nil and ComponentGetValue2( kick_comp, "can_kick" )) then
+			local kick_x, kick_y = x, y
+			local kick_spot = EntityGetFirstComponentIncludingDisabled( entity_id, "HotspotComponent", "kick_pos" )
+			if( kick_spot ~= nil ) then
+				local dx, dy = ComponentGetValue2( kick_spot, "offset" )
+				kick_x, kick_y = kick_x + s_x*dx, kick_y + dy
+			end
+			local radius, force = ComponentGetValue2( kick_comp, "kick_radius" ), ComponentGetValue2( kick_comp, "player_kickforce" )
+			kick_tbl[entity_id] = { frame_num + 20, kick_x, kick_y, radius, force }
+		end
+
 		GamePlayAnimation( entity_id, "attack", 2 )
 		ComponentSetValue2( storage_melee, "value_int", frame_num + ComponentGetValue2( ai_comp, "attack_melee_frames_between" ))
 	end
+end
+
+if( kick_tbl[entity_id][1] > 0 and kick_tbl[entity_id][1] < frame_num ) then
+	local kick_x, kick_y = kick_tbl[entity_id][2], kick_tbl[entity_id][3]
+	local radius = kick_tbl[entity_id][4]
+	PhysicsApplyForceOnArea( function( body_id, mass, pos_x, pos_y, vel_x, vel_y, vel_angular )
+		local k = 15
+		local force_x = k*pen.get_sign( s_x )*mass*kick_tbl[entity_id][5]*math.cos( angle )
+		local force_y = k*mass*kick_tbl[entity_id][5]*math.sin( angle )
+		return pos_x, pos_y, force_x, force_y, 0
+	end, 0, kick_x - radius, kick_y - radius, kick_x + radius, kick_y + radius )
+	kick_tbl[entity_id][1] = 0
 end
 
 if( move_up ) then
@@ -428,13 +455,20 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 	uid = pen.new_image( gui, uid, pic_x - length/2 + 1, pic_y + bar_height/2, pic_z - 0.6, "mods/kappa/pixels_p"..math.max( kappa_id, 1 )..".png", ( length - 2 )*percentage, bar_height/2 )
 	
 	if( #attack_comps > 1 ) then
-		pic_x, pic_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 7
+		local t_x, t_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 7
 		for i = 1,#attack_comps do
 			local this_one = current_gun == i
-			uid = pen.new_image( gui, uid, pic_x + 2*( i - 1 ), pic_y, pic_z - 0.5, "mods/kappa/pixels_"..( this_one and "white" or "blue" )..".png", 1, this_one and 4/3 or 1 )
+			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5, "mods/kappa/pixels_"..( this_one and "white" or "blue" )..".png", 1, this_one and 4/3 or 1 )
 		end
 	end
 	
+	if( ComponentGetValue2( char_comp, "flying_needs_recharge" )) then
+		local perc = ComponentGetValue2( char_comp, "mFlyingTimeLeft" )/ComponentGetValue2( char_comp, "fly_time_max" )
+		if( perc < 0.99 ) then
+			uid = pen.new_image( gui, uid, pic_x - ( length/2 + 3 ), pic_y + 3*bar_height, pic_z - 0.45, "mods/kappa/pixels_blue.png", length + 6, -bar_height*perc )
+		end
+	end
+
 	if( wand_in_hand > 0 ) then
 		local abil_comp = EntityGetFirstComponentIncludingDisabled( wand_in_hand, "AbilityComponent" )
 		local mana_frames = math.max( ComponentGetValue2( abil_comp, "mana_max" ) - ComponentGetValue2( abil_comp, "mana" ), 0 )/ComponentGetValue2( abil_comp, "mana_charge_speed" )

@@ -87,6 +87,18 @@ mod_settings =
 				scope = MOD_SETTING_SCOPE_RUNTIME,
 			},
 			{
+				id = "AIM_SPEED",
+				ui_name = "Keyboard Aiming Speed",
+				ui_description = "Alters how fast the aim will drift while in keyboard mode.",
+				value_default = 3,
+				
+				value_min = 1,
+				value_max = 5,
+				value_display_multiplier = 1,
+				value_display_formatting = " $0 ",
+				scope = MOD_SETTING_SCOPE_RUNTIME,
+			},
+			{
 				id = "SHOW_UI",
 				ui_name = "Show Info",
 				ui_description = "Displays creature's stats.",

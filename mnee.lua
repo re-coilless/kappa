@@ -74,7 +74,7 @@ for i = 1,4 do
 			order_id = "bd",
 			name = "Melee",
 			desc = "Creature will attempt to perform a melee attack.",
-			keys = { [i.."gpd_a"] = 1, },
+			keys = { [i.."gpd_l2"] = 1, },
 			keys_alt = is_main and { keypad_1 = 1, } or nil,
 		},
 		
@@ -91,6 +91,13 @@ for i = 1,4 do
 			desc = "Creature will die from \"natural\" causes.",
 			keys = { [i.."gpd_b"] = 1, },
 			keys_alt = is_main and { keypad_7 = 1, } or nil,
+		},
+		spawn = {
+			order_id = "cc",
+			name = "Spawn",
+			desc = "Use this to create an additional player character.",
+			keys = { [i.."gpd_a"] = 1, },
+			keys_alt = is_main and { keypad_1 = 1, } or nil,
 		},
 	}
 end

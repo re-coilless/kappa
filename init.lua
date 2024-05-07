@@ -33,8 +33,8 @@ function OnWorldPreUpdate()
 			local spawn_ban = "KAPPA_SPAWN_BAN"..i
 			local core_flag = "KAPPA_IS_ACTIVE"..i
 			local mod_id = "kappa"..( i > 1 and ":p"..( i + 1 ) or "" )
-			local wanna_spawn = mnee.mnin( "bind", {mod_id,"melee"}, {pressed=true,dirty=true})
-
+			local wanna_spawn = mnee.mnin( "bind", {mod_id,"spawn"}, {pressed=true,dirty=true})
+			
 			local dude = EntityGetClosestWithTag( player_x, player_y, core_tag ) or 0
 			local is_real = dude > 0
 			if( is_real ) then
