@@ -242,7 +242,7 @@
 			image_file="data/enemies_gfx/kappa_arm.xml" 
 			next_rect_animation="" 
 			rect_animation="default" 
-			z_index="0.59"
+			z_index="-1.5"
 		></SpriteComponent>
 
 		<InheritTransformComponent
