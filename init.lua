@@ -93,14 +93,14 @@ function OnWorldPreUpdate()
 				GameRemoveFlagRun( core_flag )
 			end
 		end
-
+		
 		if( real_count > 1 ) then
 			local shooter_comp = EntityGetFirstComponentIncludingDisabled( players[1], "PlatformShooterPlayerComponent" )
 			if( shooter_comp ~= nil ) then
 				local cam_pos = { ComponentGetValue2( shooter_comp, "mSmoothedCameraPosition" )}
 				local wanna_pos = { x_count/real_count, y_count/real_count }
 				local smoothing = 15
-				local pos_x, pos_y = cam_pos[1] + ( wanna_pos[1] - cam_pos[1] )/smoothing, cam_pos[2] + ( wanna_pos[2] - cam_pos[2] )/smoothing
+				local pos_x, pos_y = cam_pos[1] + ( wanna_pos[1] - cam_pos[1])/smoothing, cam_pos[2] + ( wanna_pos[2] - cam_pos[2])/smoothing
 				ComponentSetValue2( shooter_comp, "mSmoothedCameraPosition", pos_x, pos_y )
 				ComponentSetValue2( shooter_comp, "mDesiredCameraPos", pos_x, pos_y )
 			end
@@ -365,6 +365,11 @@ function OnWorldPreUpdate()
 			})
 			EntityAddComponent( target_entity, "VariableStorageComponent", 
 			{
+				name = "kappa_dash_cooldown",
+				value_int = 0,
+			})
+			EntityAddComponent( target_entity, "VariableStorageComponent", 
+			{
 				name = "kappa_current_gun",
 				value_int = 1,
 			})
@@ -381,6 +386,9 @@ function OnWorldPreUpdate()
 			})
 			
 			GameAddFlagRun( "KAPPA_IS_ACTIVE" )
+			if( is_coop and GameGetFrameNum() < 100 ) then
+				EntitySetTransform( target_entity, EntityGetTransform( players[1]))
+			end
 		end
 	elseif( #( EntityGetWithTag( "kappaed" ) or {} ) == 0 ) then
 		GameRemoveFlagRun( "KAPPA_IS_ACTIVE" )

@@ -15,6 +15,7 @@
 			sense_creatures="1"
 			can_fly="1"  
 			attack_melee_enabled="1"
+			attack_melee_frames_between="40"
 			attack_landing_ranged_enabled="0"
 			attack_ranged_enabled="0"
 			attack_ranged_entity_file=""
@@ -190,7 +191,7 @@
 
 	<PlatformShooterPlayerComponent
 	></PlatformShooterPlayerComponent>
-
+	
 	<VariableStorageComponent
 		name="kappa"
 		value_int="1"
@@ -205,6 +206,10 @@
 	></VariableStorageComponent>
 	<VariableStorageComponent
 		name="kappa_melee_cooldown"
+		value_int="0"
+	></VariableStorageComponent>
+	<VariableStorageComponent
+		name="kappa_dash_cooldown"
 		value_int="0"
 	></VariableStorageComponent>
 	<VariableStorageComponent

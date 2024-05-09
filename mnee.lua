@@ -48,6 +48,13 @@ for i = 1,4 do
 			keys = { "is_axis", i.."gpd_axis_rh", },
 			keys_alt = { "is_axis", "NOPE", "NOPE" },
 		},
+		halt_autoaim = {
+			order_id = "ae",
+			name = "Halt Autoaim",
+			desc = "Stops aim assists from messing up the inputs while is held.",
+			keys = { [i.."gpd_r1"] = 1, },
+			keys_alt = is_main and { ["keypad_3"] = 1, } or nil,
+		},
 		
 		next_gun = {
 			order_id = "ba",

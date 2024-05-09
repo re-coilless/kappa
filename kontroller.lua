@@ -4,18 +4,20 @@ dofile_once( "mods/mnee/lib.lua" )
 local entity_id = GetUpdatedEntityID()
 local x, y, r, s_x, s_y = EntityGetTransform( entity_id )
 
+input_memo = input_memo or {}
+input_memo[ entity_id ] = input_memo[ entity_id ] or false
 kick_tbl = kick_tbl or {}
 kick_tbl[entity_id] = kick_tbl[entity_id] or { 0, 0, 0, 0, 0 }
 
 local frame_num = GameGetFrameNum()
 local timer = ComponentGetValue2( GetUpdatedComponentID(), "mTimesExecuted" )
 
-local storage_angle = pen.get_storage( entity_id, "kappa_angle" )
-local angle = ComponentGetValue2( storage_angle, "value_float" )
 local storage_ranged = pen.get_storage( entity_id, "kappa_ranged_cooldown" )
 local ranged_cooldown = ComponentGetValue2( storage_ranged, "value_int" )
 local storage_melee = pen.get_storage( entity_id, "kappa_melee_cooldown" )
 local melee_cooldown = ComponentGetValue2( storage_melee, "value_int" )
+local storage_dash = pen.get_storage( entity_id, "kappa_dash_cooldown" )
+local dash_cooldown = ComponentGetValue2( storage_dash, "value_int" )
 local storage_gun = pen.get_storage( entity_id, "kappa_current_gun" )
 local current_gun = ComponentGetValue2( storage_gun, "value_int" )
 
@@ -77,6 +79,13 @@ if( is_coop ) then
 					ComponentSetValue2( shooter_comp, "mSmoothedCameraPosition", cam_pos[1] + ( wanna_pos[1] - cam_pos[1] )/smoothing, cam_pos[2] + ( wanna_pos[2] - cam_pos[2] )/smoothing )
 				end
 			end
+		else
+			local core_x, core_y = pen.get_creature_centre( entity_id, x, y )
+			local money = EntityGetInRadiusWithTag( core_x, core_y, 10, "gold_nugget" ) or {}
+			for i,gold in ipairs( money ) do
+				EntitySetTransform( gold, player_x, player_y )
+				EntityApplyTransform( gold, player_x, player_y )
+			end
 		end
 	end
 end
@@ -92,24 +101,40 @@ local aim_h,_,is_buttoned_h = mnee.mnin( "axis", {mod_id,"aim_h"}, {dirty=true})
 local controller_moment = not( is_buttoned_v and is_buttoned_h )
 if( plat_comp ~= nil ) then
 	if( aim_v ~= 0 or move_left or move_right or controller_moment ) then
-		ComponentSetValue2( plat_comp, "keyboard_look", not( controller_moment ))
-		ComponentSetValue2( plat_comp, "mouse_look", controller_moment )
+		ComponentSetValue2( plat_comp, "keyboard_look", not( input_memo[ entity_id ]))
+		ComponentSetValue2( plat_comp, "mouse_look", input_memo[ entity_id ])
 	end
 end
 
+local show_aim = ModSettingGetNextValue( "kappa.SHOW_AIM" )
+local aim_data = {
+	tag_tbl = not( is_coop ) and {"player_unit"} or nil,
+	pic = not( show_aim ) and "" or nil,
+}
+local has_weapon = wand_in_hand > 0 or ComponentGetValue2( ai_comp, "attack_ranged_enabled" ) or attack_comp ~= nil
+local autoaim = has_weapon and ModSettingGetNextValue( "kappa.AUTOAIM" ) and not( mnee.mnin( "bind", {mod_id,"halt_autoaim"}, {dirty=true}))
+local storage_angle = pen.get_storage( entity_id, "kappa_angle" )
+local angle = ComponentGetValue2( storage_angle, "value_float" )
 if( aim_v ~= 0 or controller_moment ) then
 	if( controller_moment ) then
-		angle = math.atan2( aim_v, pen.get_sign( s_x )*aim_h )
+		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, math.atan2( aim_v, aim_h ), autoaim, aim_data )
 	else
 		angle = math.max( math.min( angle - ( aim_v < 0 and 1 or -1 )*a_speed, a_limit ), -a_limit )
 	end
+	input_memo[ entity_id ] = controller_moment 
 	ComponentSetValue2( storage_angle, "value_float", angle )
 	
 	if( attack_comp ~= nil and ComponentGetValue2( attack_comp, "attack_ranged_aim_rotation_enabled" )) then
 		GameEntityPlaySoundLoop( entity_id, "turret_rotate_sound", 1.0 )
 	end
 end
-local a_vector = { s_x*math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
+local aim_sign = input_memo[ entity_id ] and 1 or s_x
+local a_vector = { aim_sign*math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
+angle = math.atan2( a_vector[2], a_vector[1])
+if( not( controller_moment ) and autoaim ) then
+	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, angle, aim_data )
+	a_vector = { math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
+end
 ComponentSetValue2( ctrl_comp, "mAimingVector", a_vector[1], a_vector[2] )
 ComponentSetValue2( ctrl_comp, "mMousePosition", a_vector[1]*1000, a_vector[2]*1000 )
 
@@ -131,6 +156,7 @@ local gonna_shoot = mnee.mnin( "bind", {mod_id,"shoot"}, {dirty=true})
 local gonna_melee = mnee.mnin( "bind", {mod_id,"melee"}, {dirty=true})
 
 local gun_dude = entity_id
+local bangle = angle + math.rad( 90 - 90*s_x )
 if( attack_comp ~= nil ) then
 	local kids = EntityGetAllChildren( entity_id ) or {}
 	if( #kids > 0 ) then
@@ -143,7 +169,7 @@ if( attack_comp ~= nil ) then
 		if( gun_dude ~= entity_id ) then
 			local trans_comp = EntityGetFirstComponentIncludingDisabled( gun_dude, "InheritTransformComponent" )
 			local origs = { ComponentGetValue2( trans_comp, "Transform" ) }
-			ComponentSetValue2( trans_comp, "Transform", origs[1], origs[2], origs[3], origs[4], s_x*angle )
+			ComponentSetValue2( trans_comp, "Transform", origs[1], origs[2], origs[3], origs[4], bangle )
 			
 			if( not( gonna_shoot )) then
 				EntityRefreshSprite( gun_dude, EntityGetFirstComponentIncludingDisabled( gun_dude, "SpriteComponent", "kids_gun" ))
@@ -161,8 +187,8 @@ elseif( ComponentGetValue2( ai_comp, "attack_ranged_enabled" ) or attack_comp ~=
 		local barrel_x, barrel_y, amount, cooldown, path, anim = 0, 0, 1, 0, "", "attack_ranged"
 		if( attack_comp ~= nil ) then
 			local off_x, off_y = ComponentGetValue2( attack_comp, "attack_ranged_offset_x" ), ComponentGetValue2( attack_comp, "attack_ranged_offset_y" )
-			barrel_x, barrel_y = off_x*math.cos( angle ), off_x*math.sin( angle )
-			barrel_x, barrel_y = barrel_x + off_y*math.cos( angle + math.rad( 90 )), barrel_y + off_y*math.sin( angle + math.rad( 90 ))
+			barrel_x, barrel_y = off_x*math.cos( s_x*bangle ), off_x*math.sin( s_x*bangle )
+			barrel_x, barrel_y = barrel_x + off_y*math.cos( bangle + math.rad( 90 )), barrel_y + off_y*math.sin( bangle + math.rad( 90 ))
 			barrel_x, barrel_y = barrel_x + ComponentGetValue2( attack_comp, "attack_ranged_root_offset_x" ), barrel_y + ComponentGetValue2( attack_comp, "attack_ranged_root_offset_y" )
 			
 			amount = math.random( ComponentGetValue2( attack_comp, "attack_ranged_entity_count_min" ), ComponentGetValue2( attack_comp, "attack_ranged_entity_count_max" ))
@@ -285,30 +311,32 @@ if( kick_tbl[entity_id][1] > 0 and kick_tbl[entity_id][1] < frame_num ) then
 	local radius = kick_tbl[entity_id][4]
 	PhysicsApplyForceOnArea( function( body_id, mass, pos_x, pos_y, vel_x, vel_y, vel_angular )
 		local k = 15
-		local force_x = k*pen.get_sign( s_x )*mass*kick_tbl[entity_id][5]*math.cos( angle )
+		local force_x = k*mass*kick_tbl[entity_id][5]*math.cos( angle )
 		local force_y = k*mass*kick_tbl[entity_id][5]*math.sin( angle )
 		return pos_x, pos_y, force_x, force_y, 0
 	end, 0, kick_x - radius, kick_y - radius, kick_x + radius, kick_y + radius )
 	kick_tbl[entity_id][1] = 0
 end
 
-if( move_up ) then
-	ComponentSetValue2( plat_comp, "mSmoothedFlyingTargetY", -999999 )
-end
+if( move_up ) then ComponentSetValue2( plat_comp, "mSmoothedFlyingTargetY", -999999 ) end
 if( ComponentGetValue2( ai_comp, "can_fly" )) then
 	ComponentSetValue2( ctrl_comp, "mButtonDownFly", move_up )
-	GamePlayAnimation( entity_id, "jump_"..(( move_left or move_right ) and "move" or "idle" ), 0.5 )
-elseif( not( ComponentGetValue2( dmg_comp, "mAirAreWeInWater" )) and ComponentGetValue2( char_comp, "is_on_ground" ) and move_up ) then
+	GamePlayAnimation( entity_id, "fly_"..(( move_left or move_right ) and "move" or "idle" ), 0.5 )
+elseif( dash_cooldown < frame_num and not( ComponentGetValue2( dmg_comp, "mAirAreWeInWater" )) and ComponentGetValue2( char_comp, "is_on_ground" ) and move_up ) then
+	local cooldown = 0
 	local j_x, j_y = 0, 0
 	if( ComponentGetValue2( ai_comp, "attack_dash_enabled" )) then
 		local speed = math.max( ComponentGetValue2( ai_comp, "attack_dash_speed" ), 200 )
-		j_x, j_y = speed*s_x*math.cos( angle - math.rad( 10 )), speed*s_y*math.sin( angle - math.rad( 10 ))
+		j_x, j_y = speed*math.cos( angle - math.rad( 10 )), speed*s_y*math.sin( angle - math.rad( 10 ))
+		cooldown = ComponentGetValue2( ai_comp, "attack_dash_frames_between" )/2
 	else
 		j_x, j_y = ComponentGetValue2( plat_comp, "jump_velocity_x" ), math.min( ComponentGetValue2( plat_comp, "jump_velocity_y" ), -200 )
+		cooldown = 20
 	end
 	local v_x, v_y = ComponentGetValue2( char_comp, "mVelocity" )
 	ComponentSetValueVector2( char_comp, "mVelocity", v_x + j_x, v_y + j_y )
 	GamePlayAnimation( entity_id, "jump_up", 1 )
+	ComponentSetValue2( storage_dash, "value_int", frame_num + cooldown )
 end
 
 if( kappa_id == 0 and timer < 10 ) then
@@ -360,9 +388,8 @@ if( kappa_id == 0 ) then
 		end
 	else
 		if( mnee.mnin( "bind", {mod_id,"suicide"}, {pressed=true,dirty=true})) then
-			if( is_coop and hands_comp ~= nil ) then
-				ComponentSetValue2( hands_comp, "drop_items_on_death", false )
-			end
+			if( is_coop and hands_comp ~= nil ) then ComponentSetValue2( hands_comp, "drop_items_on_death", false ) end
+			EntityRemoveComponent( entity_id, EntityGetFirstComponentIncludingDisabled( entity_id, "PlatformShooterPlayerComponent" ))
 			
 			EntityInflictDamage( entity_id, 9999999, "DAMAGE_SLICE", "GET KAPPAED LOL", "BLOOD_EXPLOSION", 0, 0, entity_id, x, y, 0 )
 			if( EntityHasTag( entity_id, "godlike" )) then
@@ -427,10 +454,9 @@ if( ModSettingGetNextValue( "kappa.SHOW_POINTER" )) then
 	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z, pic..".png", scale_x, scale_y )
 end
 
-if( ModSettingGetNextValue( "kappa.SHOW_AIM" )) then
+if( show_aim ) then
 	local drift = math.abs( s_x > 0 and ComponentGetValue2( hitbox_comp, "aabb_max_x" ) or ComponentGetValue2( hitbox_comp, "aabb_min_x" )) + 20
-	local a_x, a_y = s_x*math.cos( angle ), s_y*math.sin( angle )
-	pic_x, pic_y = pen.world2gui( gui, x + drift*a_x, y + drift*a_y )
+	pic_x, pic_y = pen.world2gui( gui, x + drift*math.cos( angle ), y + drift*s_y*math.sin( angle ))
 	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z - 1, "mods/kappa/pointer/"..math.max( kappa_id, 1 ).."pointer.png" )
 end
 
@@ -455,7 +481,7 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 	uid = pen.new_image( gui, uid, pic_x - length/2 + 1, pic_y + bar_height/2, pic_z - 0.6, "mods/kappa/pixels_p"..math.max( kappa_id, 1 )..".png", ( length - 2 )*percentage, bar_height/2 )
 	
 	if( #attack_comps > 1 ) then
-		local t_x, t_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 7
+		local t_x, t_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 3*bar_height + 1
 		for i = 1,#attack_comps do
 			local this_one = current_gun == i
 			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5, "mods/kappa/pixels_"..( this_one and "white" or "blue" )..".png", 1, this_one and 4/3 or 1 )
@@ -471,7 +497,7 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 
 	if( wand_in_hand > 0 ) then
 		local abil_comp = EntityGetFirstComponentIncludingDisabled( wand_in_hand, "AbilityComponent" )
-		local mana_frames = math.max( ComponentGetValue2( abil_comp, "mana_max" ) - ComponentGetValue2( abil_comp, "mana" ), 0 )/ComponentGetValue2( abil_comp, "mana_charge_speed" )
+		local mana_frames = 2*math.max( ComponentGetValue2( abil_comp, "mana_max" ) - ComponentGetValue2( abil_comp, "mana" ), 0 )/ComponentGetValue2( abil_comp, "mana_charge_speed" )
         local delay_frames = math.max( ComponentGetValue2( abil_comp, "mNextFrameUsable" ) - frame_num, 0 )
 		local reload_frames = math.max( ComponentGetValue2( abil_comp, "mReloadNextFrameUsable" ) - frame_num, 0 )
 		local full_frame = math.min(( is_pinned and 3 or 1 )*math.ceil( mana_frames + delay_frames + reload_frames )/10, length )
