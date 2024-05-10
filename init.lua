@@ -1,4 +1,4 @@
-ModRegisterAudioEventMappings( "mods/kappa/sfx/GUIDs.txt" )
+ModRegisterAudioEventMappings( "mods/kappa/files/sfx/GUIDs.txt" )
 
 if( ModIsEnabled( "mnee" )) then
 	ModLuaFileAppend( "mods/mnee/bindings.lua", "mods/kappa/mnee.lua" )
@@ -22,7 +22,7 @@ function OnWorldPreUpdate()
 	
 	dofile_once( "mods/mnee/lib.lua" )
 	dofile_once( "data/scripts/lib/utilities.lua" )
-	dofile_once( "mods/kappa/incompatibility_list.lua" )
+	dofile_once( "mods/kappa/incompatibility.lua" )
 	
 	local mode = ModSettingGet( "kappa.GLOBAL_MODE" )
 	if( mode == 3 ) then
@@ -52,7 +52,7 @@ function OnWorldPreUpdate()
 				end
 			elseif( not( is_alive )) then
 				if( wanna_spawn ) then
-					local target_entity = EntityLoad( "mods/kappa/kappa.xml", player_x, player_y )
+					local target_entity = EntityLoad( "mods/kappa/files/kappa.xml", player_x, player_y )
 					EntityLoad( "data/entities/particles/teleportation_target.xml", player_x, player_y )
 					
 					EntityRemoveTag( target_entity, "teleportable_NOT" )
@@ -74,13 +74,13 @@ function OnWorldPreUpdate()
 					local dmg_comp = EntityGetFirstComponentIncludingDisabled( target_entity, "DamageModelComponent" )
 					ComponentSetValue2( dmg_comp, "max_hp", player_hp )
 					ComponentSetValue2( dmg_comp, "hp", player_hp )
-
-					local wand_id = EntityLoad( "data/entities/items/starting_wand_rng_daily.xml", player_x, player_y )
+					
+					local wand_id = EntityLoad( "data/entities/items/starting_wand_rng.xml", player_x, player_y )
 					GamePickUpInventoryItem( target_entity, wand_id, false )
 					EntityAddComponent( wand_id, "LuaComponent", 
 					{
 						_tags = "enabled_in_world",
-						script_source_file = "mods/kappa/wand_nuker.lua",
+						script_source_file = "mods/kappa/files/wand_nuker.lua",
 						execute_every_n_frame = "1",
 					})
 
@@ -154,7 +154,7 @@ function OnWorldPreUpdate()
 					for i,pic in ipairs( gun_pics ) do
 						ComponentSetValue2( pic, "visible", false )
 						
-						local kid = EntityLoad( "mods/kappa/base_kid.xml", x, y )
+						local kid = EntityLoad( "mods/kappa/files/base_kid.xml", x, y )
 						local pic_comp = EntityGetFirstComponentIncludingDisabled( kid, "SpriteComponent" )
 						
 						ComponentSetValue2( pic_comp, "image_file", ComponentGetValue2( pic, "image_file" ))
@@ -197,7 +197,7 @@ function OnWorldPreUpdate()
 					EntityAddComponent( target_entity, "AudioLoopComponent", 
 					{
 						_tags = "godlike",
-						file = "mods/kappa/sfx/kappa.bank",
+						file = "mods/kappa/files/sfx/kappa.bank",
 						event_name = "godlike",
 						volume_autofade_speed = "0.25",
 					})
@@ -270,8 +270,8 @@ function OnWorldPreUpdate()
 						airflow_force = math.min( total_amount*2, 100 ),
 						airflow_time = "10",
 						airflow_scale = "50",
-						image_animation_file = "mods/kappa/glow.png",
-						image_animation_colors_file = "mods/kappa/glow_pic.png",
+						image_animation_file = "mods/kappa/files/pics/glow.png",
+						image_animation_colors_file = "mods/kappa/files/pics/glow_pic.png",
 						image_animation_speed = "1000",
 						image_animation_raytrace_from_center = "0",
 						image_animation_loop = "1",
@@ -375,12 +375,12 @@ function OnWorldPreUpdate()
 			})
 			EntityAddComponent( target_entity, "LuaComponent", 
 			{
-				script_source_file = "mods/kappa/kontroller.lua",
+				script_source_file = "mods/kappa/files/kontroller.lua",
 				execute_every_n_frame = "1",
 			})
 			EntityAddComponent( target_entity, "LuaComponent", 
 			{
-				script_source_file = "mods/kappa/remover.lua",
+				script_source_file = "mods/kappa/files/remover.lua",
 				execute_every_n_frame = "-1",
 				execute_on_removed = "1",
 			})
