@@ -41,12 +41,11 @@ local mod_id = "kappa"..( kappa_id > 1 and ":p"..( kappa_id + 1 ) or "" )
 
 local ctrl_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "ControlsComponent" )
 ComponentSetValue2( ctrl_comp, "mButtonDownRun", true )
-local axis_state = mnee.mnin( "axis", {mod_id,"movement_h"}, {dirty=true})
-local move_left, move_right = axis_state < 0, axis_state > 0
+local axis_state = mnee.mnin( "stick", {mod_id,"movement"}, {dirty=true})
+local move_left, move_right = axis_state[1] < 0, axis_state[1] > 0
 ComponentSetValue2( ctrl_comp, "mButtonDownLeft", move_left )
 ComponentSetValue2( ctrl_comp, "mButtonDownRight", move_right )
-axis_state = mnee.mnin( "axis", {mod_id,"movement_v"}, {dirty=true})
-local move_down, move_up = axis_state > 0, axis_state < 0
+local move_down, move_up = axis_state[2] > 0, axis_state[2] < 0
 ComponentSetValue2( ctrl_comp, "mButtonDownDown", move_down )
 if( move_left or move_right ) then GamePlayAnimation( entity_id, "stand", 0.1 ) end
 
@@ -96,11 +95,10 @@ local a_dist = 100
 local a_speed = math.rad( ModSettingGetNextValue( "kappa.AIM_SPEED" ))
 local a_limit = math.rad( 85 )
 
-local aim_v,_,is_buttoned_v = mnee.mnin( "axis", {mod_id,"aim_v"}, {dirty=true})
-local aim_h,_,is_buttoned_h = mnee.mnin( "axis", {mod_id,"aim_h"}, {dirty=true})
-local controller_moment = not( is_buttoned_v and is_buttoned_h )
+local aim,_,is_buttoned = mnee.mnin( "stick", {mod_id,"aim"}, {dirty=true})
+local controller_moment = not( is_buttoned[1] and is_buttoned[2])
 if( plat_comp ~= nil ) then
-	if( aim_v ~= 0 or move_left or move_right or controller_moment ) then
+	if( aim[2] ~= 0 or move_left or move_right or controller_moment ) then
 		ComponentSetValue2( plat_comp, "keyboard_look", not( input_memo[ entity_id ]))
 		ComponentSetValue2( plat_comp, "mouse_look", input_memo[ entity_id ])
 	end
@@ -115,11 +113,11 @@ local has_weapon = wand_in_hand > 0 or ComponentGetValue2( ai_comp, "attack_rang
 local autoaim = has_weapon and ModSettingGetNextValue( "kappa.AUTOAIM" ) and not( mnee.mnin( "bind", {mod_id,"halt_autoaim"}, {dirty=true}))
 local storage_angle = pen.get_storage( entity_id, "kappa_angle" )
 local angle = ComponentGetValue2( storage_angle, "value_float" )
-if( aim_v ~= 0 or controller_moment ) then
+if( aim[2] ~= 0 or controller_moment ) then
 	if( controller_moment ) then
-		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, math.atan2( aim_v, aim_h ), autoaim, aim_data )
+		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, math.atan2( aim[2], aim[1]), autoaim, aim_data )
 	else
-		angle = math.max( math.min( angle - ( aim_v < 0 and 1 or -1 )*a_speed, a_limit ), -a_limit )
+		angle = math.max( math.min( angle - ( aim[2] < 0 and 1 or -1 )*a_speed, a_limit ), -a_limit )
 	end
 	input_memo[ entity_id ] = controller_moment 
 	ComponentSetValue2( storage_angle, "value_float", angle )

@@ -10,46 +10,64 @@ for i = 1,4 do
 	end
 	bindings["kappa"..( is_main and "" or ":p"..( i + 1 ))] = {
 		rally = is_main and {
-			order_id = "!",
+			order_id = "!a",
 			name = "Rally",
 			desc = "Teleports all secondary players to the primary (does not work in PvP mode).",
 			keys = { x = 1, },
 		} or nil,
+		spawn = {
+			order_id = "!b",
+			name = "Spawn",
+			desc = "Use this to create an additional player character.",
+			keys = { [i.."gpd_a"] = 1, },
+			keys_alt = is_main and { keypad_1 = 1, } or nil,
+		},
 
 		movement_v = {
-			order_id = "aa",
-			jpad_type = "MOTION",
+			is_hidden = true,
 			name = "Movement Vertical",
 			desc = "Controls up and down.",
 			keys = { "is_axis", i.."gpd_axis_lv", },
 			keys_alt = is_main and { "is_axis", "keypad_8", "keypad_5" } or nil,
 		},
 		movement_h = {
-			order_id = "ab",
-			jpad_type = "MOTION",
+			is_hidden = true,
 			name = "Movement Horizontal",
 			desc = "Controls left and right.",
 			keys = { "is_axis", i.."gpd_axis_lh", },
 			keys_alt = is_main and { "is_axis", "keypad_4", "keypad_6" } or nil,
 		},
+		movement = {
+			order_id = "aa",
+			jpad_type = "MOTION",
+			deadzone = 0.05,
+			name = "Movement",
+			desc = "Moves the character around.",
+			axes = { "movement_h", "movement_v" },
+		},
 		aim_v = {
-			order_id = "ac",
-			jpad_type = "AIM",
+			is_hidden = true,
 			name = "Aim Vertical",
 			desc = "Controls up and down.",
 			keys = { "is_axis", i.."gpd_axis_rv", },
 			keys_alt = is_main and { "is_axis", "up", "down" } or { "is_axis", "NOPE", "NOPE" },
 		},
 		aim_h = {
-			order_id = "ad",
-			jpad_type = "AIM",
+			is_hidden = true,
 			name = "Aim Horizontal",
 			desc = "Controls left and right.",
 			keys = { "is_axis", i.."gpd_axis_rh", },
 			keys_alt = { "is_axis", "NOPE", "NOPE" },
 		},
+		aim = {
+			order_id = "ab",
+			jpad_type = "AIM",
+			name = "Aim",
+			desc = "Moves the crosshair around.",
+			axes = { "aim_h", "aim_v" },
+		},
 		halt_autoaim = {
-			order_id = "ae",
+			order_id = "ac",
 			name = "Halt Autoaim",
 			desc = "Stops aim assists from messing up the inputs while is held.",
 			keys = { [i.."gpd_r1"] = 1, },
@@ -98,13 +116,6 @@ for i = 1,4 do
 			desc = "Creature will die from \"natural\" causes.",
 			keys = { [i.."gpd_b"] = 1, },
 			keys_alt = is_main and { keypad_7 = 1, } or nil,
-		},
-		spawn = {
-			order_id = "cc",
-			name = "Spawn",
-			desc = "Use this to create an additional player character.",
-			keys = { [i.."gpd_a"] = 1, },
-			keys_alt = is_main and { keypad_1 = 1, } or nil,
 		},
 	}
 end
