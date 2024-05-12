@@ -26,12 +26,12 @@ function OnWorldPreUpdate()
 	
 	local mode = ModSettingGet( "kappa.GLOBAL_MODE" )
 	if( mode == 3 ) then
+		local flags = { "KAPPA_IS_ACTIVE", "KAPPA_SPAWN_BAN" }
 		local player_x, player_y = EntityGetTransform( players[1])
 		local real_count, x_count, y_count = 1, player_x, player_y
 		for i = 1,4 do
 			local core_tag = "kappaed"..i
-			local spawn_ban = "KAPPA_SPAWN_BAN"..i
-			local core_flag = "KAPPA_IS_ACTIVE"..i
+			local core_flag, spawn_ban = flags[1]..i, flags[2]..i
 			local mod_id = "kappa"..( i > 1 and ":p"..( i + 1 ) or "" )
 			local wanna_spawn = mnee.mnin( "bind", {mod_id,"spawn"}, {pressed=true,dirty=true})
 			
@@ -104,6 +104,25 @@ function OnWorldPreUpdate()
 				ComponentSetValue2( shooter_comp, "mSmoothedCameraPosition", pos_x, pos_y )
 				ComponentSetValue2( shooter_comp, "mDesiredCameraPos", pos_x, pos_y )
 			end
+		end
+
+		local waiting_for_what = false
+		for i = 1,4 do
+			if( not( GameHasFlagRun( flags[1]..i ) or GameHasFlagRun( flags[2]..i )) and ( i == 1 or mnee.is_jpad_real( i ))) then
+				waiting_for_what = i
+				break
+			end
+		end
+		if( waiting_for_what ) then
+			local gui = GuiCreate()
+			GuiStartFrame( gui )
+			
+			local txt = "Press "..mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", true ).." to spawn a player."
+			local pic_x, pic_y = pen.world2gui( gui, player_x, player_y + 10 )
+			local off_x = GuiGetTextDimensions( gui, txt, 1, 2 )
+			pen.new_text( gui, pic_x - off_x/2, pic_y, 100, txt, {255,255,174})
+
+			GuiDestroy( gui )
 		end
 	elseif( not( GameHasFlagRun( "KAPPA_IS_ACTIVE" ))) then
 		local p_x, p_y = DEBUG_GetMouseWorld()

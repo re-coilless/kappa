@@ -278,7 +278,7 @@ if( ComponentGetValue2( ai_comp, "attack_melee_enabled" )) then
 				if( meat ~= entity_id and EntityGetRootEntity( meat ) == meat ) then
 					if( EntityGetFirstComponentIncludingDisabled( meat, "DamageModelComponent" ) ~= nil ) then
 						local gene_comp = EntityGetFirstComponentIncludingDisabled( meat, "GenomeDataComponent" )
-						if( not( is_coop ) or ( gene_comp == nil ) or ( gene_comp ~= nil and ComponentGetValue2( gene_comp, "herd_id" ) ~= StringToHerdId( "player" ))) then
+						if( gene_comp ~= nil and not( is_coop and ComponentGetValue2( gene_comp, "herd_id" ) == StringToHerdId( "player" ))) then
 							local m_x, m_y = EntityGetTransform( meat )
 							EntityInflictDamage( meat, math.random( dmg[1], dmg[2] ), "DAMAGE_MELEE", "Gotcha", "BLOOD_SPRAY", force_x, force_y, entity_id, m_x, m_y, force )
 						end
@@ -495,10 +495,12 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 
 	if( wand_in_hand > 0 ) then
 		local abil_comp = EntityGetFirstComponentIncludingDisabled( wand_in_hand, "AbilityComponent" )
-		local mana_frames = 2*math.max( ComponentGetValue2( abil_comp, "mana_max" ) - ComponentGetValue2( abil_comp, "mana" ), 0 )/ComponentGetValue2( abil_comp, "mana_charge_speed" )
+		local mana, mana_max = ComponentGetValue2( abil_comp, "mana" ), ComponentGetValue2( abil_comp, "mana_max" )
+		local mana_perc = ( 1 - mana/mana_max )^2
+		local mana_frames = 60*math.max( mana_max - mana, 0 )/ComponentGetValue2( abil_comp, "mana_charge_speed" )
         local delay_frames = math.max( ComponentGetValue2( abil_comp, "mNextFrameUsable" ) - frame_num, 0 )
 		local reload_frames = math.max( ComponentGetValue2( abil_comp, "mReloadNextFrameUsable" ) - frame_num, 0 )
-		local full_frame = math.min(( is_pinned and 3 or 1 )*math.ceil( mana_frames + delay_frames + reload_frames )/10, length )
+		local full_frame = math.min(( is_pinned and 3 or 1 )*math.ceil( mana_perc*mana_frames + delay_frames + reload_frames )/10, length - 4 )
 		if( full_frame > 1 ) then
 			uid = pen.new_image( gui, uid, pic_x - full_frame/2, pic_y - ( is_pinned and 2 or 0 ), pic_z - 0.55, "mods/kappa/files/pics/pixels_blue.png", full_frame, is_pinned and 1.5 or 2 )
 		end
