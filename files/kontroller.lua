@@ -482,7 +482,7 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 		local t_x, t_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 3*bar_height + 1
 		for i = 1,#attack_comps do
 			local this_one = current_gun == i
-			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5, "mods/kappa/pixels_"..( this_one and "white" or "blue" )..".png", 1, this_one and 4/3 or 1 )
+			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5, "mods/kappa/files/pics/pixels_"..( this_one and "white" or "blue" )..".png", 1, this_one and 4/3 or 1 )
 		end
 	end
 	
