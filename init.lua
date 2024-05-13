@@ -47,7 +47,7 @@ function OnWorldPreUpdate()
 			local is_alive = GameHasFlagRun( core_flag )
 			if( GameHasFlagRun( spawn_ban )) then
 				if( wanna_spawn and not( is_alive )) then
-					pen.play_sound( "error" )
+					mnee.play_sound( "error" )
 					GamePrint( "PICK UP TEMPLE HEART TO RESPAWN" )
 				end
 			elseif( not( is_alive )) then
@@ -118,7 +118,7 @@ function OnWorldPreUpdate()
 			GuiStartFrame( gui )
 			
 			local txt = "Press "..mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", true ).." to spawn a player."
-			local pic_x, pic_y = pen.world2gui( gui, player_x, player_y + 10 )
+			local pic_x, pic_y = pen.world2gui( player_x, player_y + 10 )
 			local off_x = GuiGetTextDimensions( gui, txt, 1, 2 )
 			pen.new_text( gui, pic_x - off_x/2, pic_y, 100, txt, {255,255,174})
 

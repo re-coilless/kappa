@@ -412,7 +412,7 @@ GuiStartFrame( gui )
 local w, h = GuiGetScreenDimensions( gui )
 
 if( ModSettingGetNextValue( "kappa.SHOW_POINTER" )) then
-	pic_x, pic_y = pen.world2gui( gui, x, y + ComponentGetValue2( hitbox_comp, "aabb_min_y" ) - 10 )
+	pic_x, pic_y = pen.world2gui( x, y + ComponentGetValue2( hitbox_comp, "aabb_min_y" ) - 10 )
 	local scale_x, scale_y = 1, 1
 	local pic = "mods/kappa/files/pics/pointer/"..math.max( kappa_id, 1 ).."pointer"
 	if( pic_x >= w and pic_y >= h ) then
@@ -454,7 +454,7 @@ end
 
 if( show_aim ) then
 	local drift = math.abs( s_x > 0 and ComponentGetValue2( hitbox_comp, "aabb_max_x" ) or ComponentGetValue2( hitbox_comp, "aabb_min_x" )) + 20
-	pic_x, pic_y = pen.world2gui( gui, x + drift*math.cos( angle ), y + drift*s_y*math.sin( angle ))
+	pic_x, pic_y = pen.world2gui( x + drift*math.cos( angle ), y + drift*s_y*math.sin( angle ))
 	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z - 1, "mods/kappa/files/pics/pointer/"..math.max( kappa_id, 1 ).."pointer.png" )
 end
 
@@ -471,7 +471,7 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 			pic_x = ( w/2 - 90 ) + ( kappa_id - 1 )*60
 		end
 	else
-		pic_x, pic_y = pen.world2gui( gui, x, y + ComponentGetValue2( hitbox_comp, "aabb_max_y" ) + 5 )
+		pic_x, pic_y = pen.world2gui( x, y + ComponentGetValue2( hitbox_comp, "aabb_max_y" ) + 5 )
 	end
 	
 	local bar_height = is_pinned and 1.5 or 2
