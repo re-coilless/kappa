@@ -130,7 +130,7 @@ local aim_sign = input_memo[ entity_id ] and 1 or s_x
 local a_vector = { aim_sign*math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
 angle = math.atan2( a_vector[2], a_vector[1])
 if( not( controller_moment ) and autoaim ) then
-	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, angle, aim_data )
+	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, angle, autoaim, aim_data )
 	a_vector = { math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
 end
 ComponentSetValue2( ctrl_comp, "mAimingVector", a_vector[1], a_vector[2] )
