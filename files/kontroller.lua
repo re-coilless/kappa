@@ -36,7 +36,29 @@ local attack_comp = attack_comps[current_gun]
 
 local kappa_id = 0
 local storage_kappa = pen.get_storage( entity_id, "kappa" ) or 0
-if( storage_kappa > 0 ) then kappa_id = ComponentGetValue2( storage_kappa, "value_int" ) end
+if( storage_kappa > 0 ) then
+	kappa_id = ComponentGetValue2( storage_kappa, "value_int" )
+	
+	local checking = EntityGetWithTag( "kappaed" ) or {}
+	if( #checking > 1 ) then
+		local gotcha = -1
+		for i,meat in ipairs( checking ) do
+			if( meat ~= entity_id and not( EntityHasTag( meat, "kappaed"..kappa_id ))) then
+				local storage = pen.get_storage( meat, "kappa" ) or 0
+				if( storage > 0 ) then
+					if( ComponentGetValue2( storage, "value_int" ) == kappa_id and ( meat < gotcha or gotcha == -1 )) then
+						gotcha = meat
+					end
+				end
+			end
+		end
+		if( EntityGetIsAlive( gotcha )) then
+			ComponentSetValue2( pen.get_storage( gotcha, "kappa" ), "value_int", 0 )
+			GameDropAllItems( gotcha )
+			EntityKill( gotcha )
+		end
+	end
+end
 local mod_id = "kappa"..( kappa_id > 1 and ":p"..( kappa_id + 1 ) or "" )
 
 local ctrl_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "ControlsComponent" )

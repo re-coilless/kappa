@@ -28,7 +28,7 @@ function OnWorldPreUpdate()
 	if( mode == 3 ) then
 		local flags = { "KAPPA_IS_ACTIVE", "KAPPA_SPAWN_BAN" }
 		local player_x, player_y = EntityGetTransform( players[1])
-		local real_count, x_count, y_count = 1, player_x, player_y
+		local real_count, x_count, y_count = 0, 0, 0
 		for i = 1,4 do
 			local core_tag = "kappaed"..i
 			local core_flag, spawn_ban = flags[1]..i, flags[2]..i
@@ -94,12 +94,17 @@ function OnWorldPreUpdate()
 			end
 		end
 		
-		if( real_count > 1 ) then
+		if( real_count > 0 ) then
 			local shooter_comp = EntityGetFirstComponentIncludingDisabled( players[1], "PlatformShooterPlayerComponent" )
 			if( shooter_comp ~= nil ) then
-				local cam_pos = { ComponentGetValue2( shooter_comp, "mSmoothedCameraPosition" )}
-				local wanna_pos = { x_count/real_count, y_count/real_count }
+				local cam_limit = MagicNumbersGetValue( "VIRTUAL_RESOLUTION_X" )
+				local temp_x, temp_y = x_count/real_count, y_count/real_count
+				local shift_mult = 5*( 1 - math.min( math.sqrt(( temp_x - player_x )^2 + ( temp_y - player_y )^2 )/cam_limit, 1 ))
+				x_count, y_count, real_count = shift_mult*x_count + player_x, shift_mult*y_count + player_y, shift_mult*real_count
+
 				local smoothing = 15
+				local cam_pos = { ComponentGetValue2( shooter_comp, "mSmoothedCameraPosition" )}
+				local wanna_pos = { x_count/( real_count + 1 ), y_count/( real_count + 1 )}
 				local pos_x, pos_y = cam_pos[1] + ( wanna_pos[1] - cam_pos[1])/smoothing, cam_pos[2] + ( wanna_pos[2] - cam_pos[2])/smoothing
 				ComponentSetValue2( shooter_comp, "mSmoothedCameraPosition", pos_x, pos_y )
 				ComponentSetValue2( shooter_comp, "mDesiredCameraPos", pos_x, pos_y )
@@ -421,7 +426,7 @@ function OnPlayerSpawned( hooman )
 		local kid = ( i - 1 ) > 0 and i-1 or ""
 		GameRemoveFlagRun( "KAPPA_SPAWN_BAN"..kid )
 		GameRemoveFlagRun( "KAPPA_IS_ACTIVE"..kid )
-
+		
 		local x, y = EntityGetTransform( hooman )
 		local dud = EntityGetClosestWithTag( x, y, "kappaed" ) or 0
 		if( dud > 0 and EntityGetIsAlive( dud )) then
