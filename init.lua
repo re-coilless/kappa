@@ -122,7 +122,8 @@ function OnWorldPreUpdate()
 			local gui = GuiCreate()
 			GuiStartFrame( gui )
 			
-			local txt = "Press "..mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", true ).." to spawn a player."
+			local key_type = ( waiting_for_what == 1 and not( mnee.is_jpad_real( 1 ))) and 2 or 1 
+			local txt = "Press "..mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", key_type ).." to spawn a player."
 			local pic_x, pic_y = pen.world2gui( player_x, player_y + 10 )
 			local off_x = GuiGetTextDimensions( gui, txt, 1, 2 )
 			pen.new_text( gui, pic_x - off_x/2, pic_y, 100, txt, {255,255,174})
