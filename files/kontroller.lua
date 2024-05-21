@@ -126,6 +126,9 @@ if( plat_comp ~= nil ) then
 	end
 end
 
+local gonna_shoot = mnee.mnin( "bind", {mod_id,"shoot"}, {dirty=true})
+local gonna_melee = mnee.mnin( "bind", {mod_id,"melee"}, {dirty=true})
+
 local show_aim = ModSettingGetNextValue( "kappa.SHOW_AIM" )
 local aim_data = {
 	tag_tbl = not( is_coop ) and {"player_unit"} or nil,
@@ -137,7 +140,7 @@ local storage_angle = pen.get_storage( entity_id, "kappa_angle" )
 local angle = ComponentGetValue2( storage_angle, "value_float" )
 if( aim[2] ~= 0 or controller_moment ) then
 	if( controller_moment ) then
-		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, math.atan2( aim[2], aim[1]), autoaim, aim_data )
+		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, math.atan2( aim[2], aim[1]), autoaim, gonna_shoot, aim_data )
 	else
 		angle = math.max( math.min( angle - ( aim[2] < 0 and 1 or -1 )*a_speed, a_limit ), -a_limit )
 	end
@@ -152,7 +155,7 @@ local aim_sign = input_memo[ entity_id ] and 1 or s_x
 local a_vector = { aim_sign*math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
 angle = math.atan2( a_vector[2], a_vector[1])
 if( not( controller_moment ) and autoaim ) then
-	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, angle, autoaim, aim_data )
+	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, angle, autoaim, gonna_shoot, aim_data )
 	a_vector = { math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
 end
 ComponentSetValue2( ctrl_comp, "mAimingVector", a_vector[1], a_vector[2] )
@@ -171,9 +174,6 @@ if( next_gun or previous_gun ) then
 	
 	GamePlaySound( "mods/kappa/files/sfx/kappa.bank", "gun_switch", x, y )
 end
-
-local gonna_shoot = mnee.mnin( "bind", {mod_id,"shoot"}, {dirty=true})
-local gonna_melee = mnee.mnin( "bind", {mod_id,"melee"}, {dirty=true})
 
 local gun_dude = entity_id
 local bangle = angle + math.rad( 90 - 90*s_x )
@@ -382,6 +382,7 @@ elseif( timer > 10 ) then
 	end
 end
 if( mnee.mnin( "bind", {mod_id,"drop"}, {pressed=true,dirty=true})) then
+	aim_assist_korrection = nil
 	GameDropAllItems( entity_id )
 	if( hands_comp ~= nil ) then
 		EntitySetComponentIsEnabled( entity_id, hands_comp, true )
