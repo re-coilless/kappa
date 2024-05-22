@@ -133,7 +133,7 @@ local show_aim = ModSettingGetNextValue( "kappa.SHOW_AIM" )
 local aim_data = {
 	tag_tbl = not( is_coop ) and {"player_unit"} or nil,
 	pic = not( show_aim ) and "" or nil,
-	do_lining = true,
+	-- do_lining = true,
 }
 local has_weapon = wand_in_hand > 0 or ComponentGetValue2( ai_comp, "attack_ranged_enabled" ) or attack_comp ~= nil
 local autoaim = has_weapon and ModSettingGetNextValue( "kappa.AUTOAIM" ) and not( mnee.mnin( "bind", {mod_id,"halt_autoaim"}, {dirty=true}))
