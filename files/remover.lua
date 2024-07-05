@@ -3,9 +3,7 @@ dofile_once( "mods/mnee/lib.lua" )
 local entity_id = GetUpdatedEntityID()
 local x, y = EntityGetTransform( entity_id )
 
-local kappa_id = ""
-local storage_kappa = pen.get_storage( entity_id, "kappa" ) or 0
-if( storage_kappa > 0 ) then kappa_id = ComponentGetValue2( storage_kappa, "value_int" ) end
+local kappa_id = pen.magic_storage( entity_id, "kappa", "value_int" ) or ""
 
 local core_tag = "kappaed"..kappa_id
 local core_flag = "KAPPA_IS_ACTIVE"..kappa_id
@@ -18,11 +16,10 @@ if( polied > 0 ) then
 		GamePrint( "[TARGET KORRUPTED]" )
 		EntityAddTag( polied, "kappaed" )
 		EntityAddTag( polied, core_tag )
-		
-		local gene_comp = EntityGetFirstComponentIncludingDisabled( polied, "GenomeDataComponent" )
-		if( gene_comp ~= nil ) then
-			ComponentSetValue2( gene_comp, "herd_id", ComponentGetValue2( EntityGetFirstComponentIncludingDisabled( entity_id, "GenomeDataComponent" ), "herd_id" ))
-		end
+		pen.magic_comp( polied, "GenomeDataComponent", function( comp_id, v, is_enabled )
+			v.herd_id = ComponentGetValue2(
+				EntityGetFirstComponentIncludingDisabled( entity_id, "GenomeDataComponent" ), "herd_id" )
+		end)
 	end
 else
 	if( kappa_id == "" and ModSettingGetNextValue( "kappa.MANUAL_SELECTION" )) then
@@ -50,12 +47,8 @@ else
 			execute_every_n_frame = "1",
 		})
 		EntityAddChild( root_id, kid )
-	else
-		GameRemoveFlagRun( core_flag )
-	end
+	else GameRemoveFlagRun( core_flag ) end
 	
 	GamePrint( "[TARGET KRUSHED]" )
-	if( EntityGetIsAlive( entity_id )) then
-		EntityKill( entity_id )
-	end
+	if( EntityGetIsAlive( entity_id )) then EntityKill( entity_id ) end
 end

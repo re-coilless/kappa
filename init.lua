@@ -12,22 +12,22 @@ function OnModInit()
 end
 
 function OnWorldPreUpdate()
+	dofile_once( "mods/mnee/lib.lua" )
+	dofile_once( "data/scripts/lib/utilities.lua" )
+	dofile_once( "mods/kappa/incompatibility.lua" )
+	
 	if( not( ModIsEnabled( "mnee" ))) then
 		GamePrint( "[M-NEE IS REQUIRED] - check steam page description" )
 		return
 	end
 	
-	local players = EntityGetWithTag( "player_unit" ) or {}
-	if( #players == 0 ) then return end
-	
-	dofile_once( "mods/mnee/lib.lua" )
-	dofile_once( "data/scripts/lib/utilities.lua" )
-	dofile_once( "mods/kappa/incompatibility.lua" )
+	local hooman = pen.get_hooman()
+	if( not( pen.vld( hooman, true ))) then return end
 	
 	local mode = ModSettingGet( "kappa.GLOBAL_MODE" )
 	if( mode == 3 ) then
 		local flags = { "KAPPA_IS_ACTIVE", "KAPPA_SPAWN_BAN" }
-		local player_x, player_y = EntityGetTransform( players[1])
+		local player_x, player_y = EntityGetTransform( hooman )
 		local real_count, x_count, y_count = 0, 0, 0
 		for i = 1,4 do
 			local core_tag = "kappaed"..i
@@ -70,7 +70,7 @@ function OnWorldPreUpdate()
 						end
 					end
 
-					local player_hp = ComponentGetValue2( EntityGetFirstComponentIncludingDisabled( players[1], "DamageModelComponent" ), "max_hp" )/2
+					local player_hp = ComponentGetValue2( EntityGetFirstComponentIncludingDisabled( hooman, "DamageModelComponent" ), "max_hp" )/2
 					local dmg_comp = EntityGetFirstComponentIncludingDisabled( target_entity, "DamageModelComponent" )
 					ComponentSetValue2( dmg_comp, "max_hp", player_hp )
 					ComponentSetValue2( dmg_comp, "hp", player_hp )
@@ -84,10 +84,10 @@ function OnWorldPreUpdate()
 						execute_every_n_frame = "1",
 					})
 
-					ComponentSetValue2( pen.get_storage( target_entity, "kappa" ), "value_int", i )
 					GameAddFlagRun( core_flag )
 					GameAddFlagRun( spawn_ban )
 					EntityAddTag( target_entity, core_tag )
+					pen.magic_storage( target_entity, "kappa", "value_int", i )
 				end
 			elseif( not( is_real )) then
 				GameRemoveFlagRun( core_flag )
@@ -95,7 +95,7 @@ function OnWorldPreUpdate()
 		end
 		
 		if( real_count > 0 ) then
-			local shooter_comp = EntityGetFirstComponentIncludingDisabled( players[1], "PlatformShooterPlayerComponent" )
+			local shooter_comp = EntityGetFirstComponentIncludingDisabled( hooman, "PlatformShooterPlayerComponent" )
 			if( shooter_comp ~= nil ) then
 				local cam_limit = MagicNumbersGetValue( "VIRTUAL_RESOLUTION_X" )
 				local temp_x, temp_y = x_count/real_count, y_count/real_count
@@ -122,12 +122,11 @@ function OnWorldPreUpdate()
 			local gui = GuiCreate()
 			GuiStartFrame( gui )
 			
-			local key_type = ( waiting_for_what == 1 and not( mnee.is_jpad_real( 1 ))) and 2 or 1 
-			local txt = "Press "..mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", key_type ).." to spawn a player."
 			local pic_x, pic_y = pen.world2gui( player_x, player_y + 10 )
-			local off_x = GuiGetTextDimensions( gui, txt, 1, 2 )
-			pen.new_text( gui, pic_x - off_x/2, pic_y, 100, txt, {255,255,174})
-
+			local txt = table.concat({ "Press ", mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", ( waiting_for_what == 1 and not( mnee.is_jpad_real( 1 ))) and 2 or 1 ), " to spawn a player." })
+			uid = pen.new_text( gui, uid, pic_x, pic_y, pen.Z_LAYERS.world_ui, txt, {
+				is_centered_x = true, fast_render = true, color = pen.PALETTE.VNL.YELLOW })
+			
 			GuiDestroy( gui )
 		end
 	elseif( not( GameHasFlagRun( "KAPPA_IS_ACTIVE" ))) then
@@ -144,7 +143,7 @@ function OnWorldPreUpdate()
 
 		local target_entity = 0
 		if( ModSettingGetNextValue( "kappa.KAPPA_SPAWN" )) then
-			local player_x, player_y = EntityGetTransform( players[1] )
+			local player_x, player_y = EntityGetTransform( hooman )
 			target_entity = EntityLoad( ModSettingGetNextValue( "kappa.DEFAULT_KAPPA" ), player_x, player_y )
 		else
 			local targets = EntityGetInRadiusWithTag( p_x, p_y, 500, "enemy" ) or {}
@@ -412,7 +411,7 @@ function OnWorldPreUpdate()
 			
 			GameAddFlagRun( "KAPPA_IS_ACTIVE" )
 			if( is_coop and GameGetFrameNum() < 100 ) then
-				EntitySetTransform( target_entity, EntityGetTransform( players[1]))
+				EntitySetTransform( target_entity, EntityGetTransform( hooman ))
 			end
 		end
 	elseif( #( EntityGetWithTag( "kappaed" ) or {} ) == 0 ) then

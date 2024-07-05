@@ -7,18 +7,18 @@ local x, y, r, s_x, s_y = EntityGetTransform( entity_id )
 input_memo = input_memo or {}
 input_memo[ entity_id ] = input_memo[ entity_id ] or false
 kick_tbl = kick_tbl or {}
-kick_tbl[entity_id] = kick_tbl[entity_id] or { 0, 0, 0, 0, 0 }
+kick_tbl[ entity_id ] = kick_tbl[ entity_id ] or { 0, 0, 0, 0, 0 }
 
 local frame_num = GameGetFrameNum()
 local timer = ComponentGetValue2( GetUpdatedComponentID(), "mTimesExecuted" )
 
-local storage_ranged = pen.get_storage( entity_id, "kappa_ranged_cooldown" )
+local storage_ranged = pen.magic_storage( entity_id, "kappa_ranged_cooldown" )
 local ranged_cooldown = ComponentGetValue2( storage_ranged, "value_int" )
-local storage_melee = pen.get_storage( entity_id, "kappa_melee_cooldown" )
+local storage_melee = pen.magic_storage( entity_id, "kappa_melee_cooldown" )
 local melee_cooldown = ComponentGetValue2( storage_melee, "value_int" )
-local storage_dash = pen.get_storage( entity_id, "kappa_dash_cooldown" )
+local storage_dash = pen.magic_storage( entity_id, "kappa_dash_cooldown" )
 local dash_cooldown = ComponentGetValue2( storage_dash, "value_int" )
-local storage_gun = pen.get_storage( entity_id, "kappa_current_gun" )
+local storage_gun = pen.magic_storage( entity_id, "kappa_current_gun" )
 local current_gun = ComponentGetValue2( storage_gun, "value_int" )
 
 local ai_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "AnimalAIComponent" )
@@ -32,10 +32,10 @@ local plat_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "Characte
 local dmg_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "DamageModelComponent" )
 local hitbox_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "HitboxComponent" )
 local attack_comps = EntityGetComponentIncludingDisabled( entity_id, "AIAttackComponent" ) or {}
-local attack_comp = attack_comps[current_gun]
+local attack_comp = attack_comps[ current_gun ]
 
 local kappa_id = 0
-local storage_kappa = pen.get_storage( entity_id, "kappa" ) or 0
+local storage_kappa = pen.magic_storage( entity_id, "kappa" ) or 0
 if( storage_kappa > 0 ) then
 	kappa_id = ComponentGetValue2( storage_kappa, "value_int" )
 	
@@ -44,7 +44,7 @@ if( storage_kappa > 0 ) then
 		local gotcha = -1
 		for i,meat in ipairs( checking ) do
 			if( meat ~= entity_id and not( EntityHasTag( meat, "kappaed"..kappa_id ))) then
-				local storage = pen.get_storage( meat, "kappa" ) or 0
+				local storage = pen.magic_storage( meat, "kappa" ) or 0
 				if( storage > 0 ) then
 					if( ComponentGetValue2( storage, "value_int" ) == kappa_id and ( meat < gotcha or gotcha == -1 )) then
 						gotcha = meat
@@ -53,7 +53,7 @@ if( storage_kappa > 0 ) then
 			end
 		end
 		if( EntityGetIsAlive( gotcha )) then
-			ComponentSetValue2( pen.get_storage( gotcha, "kappa" ), "value_int", 0 )
+			pen.magic_storage( gotcha, "kappa", "value_int", 0 )
 			GameDropAllItems( gotcha )
 			EntityKill( gotcha )
 		end
@@ -137,7 +137,7 @@ local aim_data = {
 }
 local has_weapon = wand_in_hand > 0 or ComponentGetValue2( ai_comp, "attack_ranged_enabled" ) or attack_comp ~= nil
 local autoaim = has_weapon and ModSettingGetNextValue( "kappa.AUTOAIM" ) and not( mnee.mnin( "bind", {mod_id,"halt_autoaim"}, {dirty=true}))
-local storage_angle = pen.get_storage( entity_id, "kappa_angle" )
+local storage_angle = pen.magic_storage( entity_id, "kappa_angle" )
 local angle = ComponentGetValue2( storage_angle, "value_float" )
 if( aim[2] ~= 0 or controller_moment ) then
 	if( controller_moment ) then
@@ -311,7 +311,7 @@ if( ComponentGetValue2( ai_comp, "attack_melee_enabled" )) then
 		end
 		
 		local kick_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "KickComponent" )
-		if(( kick_tbl[entity_id][1] + 5 ) < frame_num and kick_comp ~= nil and ComponentGetValue2( kick_comp, "can_kick" )) then
+		if(( kick_tbl[ entity_id ][1] + 5 ) < frame_num and kick_comp ~= nil and ComponentGetValue2( kick_comp, "can_kick" )) then
 			local kick_x, kick_y = x, y
 			local kick_spot = EntityGetFirstComponentIncludingDisabled( entity_id, "HotspotComponent", "kick_pos" )
 			if( kick_spot ~= nil ) then
@@ -319,7 +319,7 @@ if( ComponentGetValue2( ai_comp, "attack_melee_enabled" )) then
 				kick_x, kick_y = kick_x + s_x*dx, kick_y + dy
 			end
 			local radius, force = ComponentGetValue2( kick_comp, "kick_radius" ), ComponentGetValue2( kick_comp, "player_kickforce" )
-			kick_tbl[entity_id] = { frame_num + 20, kick_x, kick_y, radius, force }
+			kick_tbl[ entity_id ] = { frame_num + 20, kick_x, kick_y, radius, force }
 		end
 
 		GamePlayAnimation( entity_id, "attack", 2 )
@@ -327,16 +327,16 @@ if( ComponentGetValue2( ai_comp, "attack_melee_enabled" )) then
 	end
 end
 
-if( kick_tbl[entity_id][1] > 0 and kick_tbl[entity_id][1] < frame_num ) then
-	local kick_x, kick_y = kick_tbl[entity_id][2], kick_tbl[entity_id][3]
-	local radius = kick_tbl[entity_id][4]
+if( kick_tbl[ entity_id ][1] > 0 and kick_tbl[ entity_id ][1] < frame_num ) then
+	local kick_x, kick_y = kick_tbl[ entity_id ][2], kick_tbl[ entity_id ][3]
+	local radius = kick_tbl[ entity_id ][4]
 	PhysicsApplyForceOnArea( function( body_id, mass, pos_x, pos_y, vel_x, vel_y, vel_angular )
 		local k = 15
-		local force_x = k*mass*kick_tbl[entity_id][5]*math.cos( angle )
-		local force_y = k*mass*kick_tbl[entity_id][5]*math.sin( angle )
+		local force_x = k*mass*kick_tbl[ entity_id ][5]*math.cos( angle )
+		local force_y = k*mass*kick_tbl[ entity_id ][5]*math.sin( angle )
 		return pos_x, pos_y, force_x, force_y, 0
 	end, 0, kick_x - radius, kick_y - radius, kick_x + radius, kick_y + radius )
-	kick_tbl[entity_id][1] = 0
+	kick_tbl[ entity_id ][1] = 0
 end
 
 if( move_up ) then ComponentSetValue2( plat_comp, "mSmoothedFlyingTargetY", -999999 ) end
@@ -429,7 +429,7 @@ end
 
 
 
-local uid, pic_x, pic_y, pic_z = 0, 0, 0, -99999
+local uid, pic_x, pic_y, pic_z = 0, 0, 0, pen.Z_LAYERS.world_ui
 
 local gui = GuiCreate()
 GuiStartFrame( gui )
@@ -473,7 +473,7 @@ if( ModSettingGetNextValue( "kappa.SHOW_POINTER" )) then
 		scale_y = -1
 		pic_y = pic_y + 1.5
 	end
-	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z, pic..".png", scale_x, scale_y )
+	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z, pic..".png", { s_x = scale_x, s_y = scale_y })
 end
 
 if( show_aim ) then
@@ -499,21 +499,25 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 	end
 	
 	local bar_height = is_pinned and 1.5 or 2
-	uid = pen.new_image( gui, uid, pic_x - length/2, pic_y, pic_z - 0.5, "mods/kappa/files/pics/pixels_white.png", length, bar_height )
-	uid = pen.new_image( gui, uid, pic_x - length/2 + 1, pic_y + bar_height/2, pic_z - 0.6, "mods/kappa/files/pics/pixels_p"..math.max( kappa_id, 1 )..".png", ( length - 2 )*percentage, bar_height/2 )
+	uid = pen.new_image( gui, uid, pic_x - length/2, pic_y, pic_z - 0.5,
+		"mods/kappa/files/pics/pixels_white.png", { s_x = length, s_y = bar_height })
+	uid = pen.new_image( gui, uid, pic_x - length/2 + 1, pic_y + bar_height/2, pic_z - 0.6,
+		"mods/kappa/files/pics/pixels_p"..math.max( kappa_id, 1 )..".png", { s_x = ( length - 2 )*percentage, s_y = bar_height/2 })
 	
 	if( #attack_comps > 1 ) then
 		local t_x, t_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 3*bar_height + 1
 		for i = 1,#attack_comps do
 			local this_one = current_gun == i
-			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5, "mods/kappa/files/pics/pixels_"..( this_one and "white" or "blue" )..".png", 1, this_one and 4/3 or 1 )
+			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5,
+				"mods/kappa/files/pics/pixels_"..( this_one and "white" or "blue" )..".png", { s_x = 1, s_y = this_one and 4/3 or 1 })
 		end
 	end
 	
 	if( ComponentGetValue2( char_comp, "flying_needs_recharge" )) then
 		local perc = ComponentGetValue2( char_comp, "mFlyingTimeLeft" )/ComponentGetValue2( char_comp, "fly_time_max" )
 		if( perc < 0.99 ) then
-			uid = pen.new_image( gui, uid, pic_x - ( length/2 + 3 ), pic_y + 3*bar_height, pic_z - 0.45, "mods/kappa/files/pics/pixels_blue.png", length + 6, -bar_height*perc )
+			uid = pen.new_image( gui, uid, pic_x - ( length/2 + 3 ), pic_y + 3*bar_height, pic_z - 0.45,
+				"mods/kappa/files/pics/pixels_blue.png", { s_x = length + 6, s_y = -bar_height*perc })
 		end
 	end
 
@@ -526,7 +530,8 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 		local reload_frames = math.max( ComponentGetValue2( abil_comp, "mReloadNextFrameUsable" ) - frame_num, 0 )
 		local full_frame = math.min(( is_pinned and 3 or 1 )*math.ceil( mana_perc*mana_frames + delay_frames + reload_frames )/10, length - 4 )
 		if( full_frame > 1 ) then
-			uid = pen.new_image( gui, uid, pic_x - full_frame/2, pic_y - ( is_pinned and 2 or 0 ), pic_z - 0.55, "mods/kappa/files/pics/pixels_blue.png", full_frame, is_pinned and 1.5 or 2 )
+			uid = pen.new_image( gui, uid, pic_x - full_frame/2, pic_y - ( is_pinned and 2 or 0 ), pic_z - 0.55,
+				"mods/kappa/files/pics/pixels_blue.png", { s_x = full_frame, s_y = is_pinned and 1.5 or 2 })
 		end
 	end
 end
