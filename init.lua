@@ -125,7 +125,7 @@ function OnWorldPreUpdate()
 			local pic_x, pic_y = pen.world2gui( player_x, player_y + 10 )
 			local txt = table.concat({ "Press ", mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", ( waiting_for_what == 1 and not( mnee.is_jpad_real( 1 ))) and 2 or 1 ), " to spawn a player." })
 			uid = pen.new_text( gui, uid, pic_x, pic_y, pen.Z_LAYERS.world_ui, txt, {
-				is_centered_x = true, fast_render = true, color = pen.PALETTE.VNL.YELLOW })
+				is_centered_x = true, color = pen.PALETTE.VNL.YELLOW })
 			
 			GuiDestroy( gui )
 		end
