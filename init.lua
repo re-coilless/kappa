@@ -18,11 +18,11 @@ function OnWorldPreUpdate()
 	
 	if( not( ModIsEnabled( "mnee" ))) then
 		GamePrint( "[M-NEE IS REQUIRED] - check steam page description" )
-		return
+		return pen.gui_builder( false )
 	end
 	
 	local hooman = pen.get_hooman()
-	if( not( pen.vld( hooman, true ))) then return end
+	if( not( pen.vld( hooman, true ))) then return pen.gui_builder( false ) end
 	
 	local mode = ModSettingGet( "kappa.GLOBAL_MODE" )
 	if( mode == 3 ) then
@@ -119,15 +119,9 @@ function OnWorldPreUpdate()
 			end
 		end
 		if( waiting_for_what ) then
-			local gui = GuiCreate()
-			GuiStartFrame( gui )
-			
 			local pic_x, pic_y = pen.world2gui( player_x, player_y + 10 )
 			local txt = table.concat({ "Press ", mnee.get_binding_keys( "kappa"..( waiting_for_what > 1 and ":p"..( waiting_for_what + 1 ) or "" ), "spawn", ( waiting_for_what == 1 and not( mnee.is_jpad_real( 1 ))) and 2 or 1 ), " to spawn a player." })
-			uid = pen.new_text( gui, uid, pic_x, pic_y, pen.Z_LAYERS.world_ui, txt, {
-				is_centered_x = true, color = pen.PALETTE.VNL.YELLOW })
-			
-			GuiDestroy( gui )
+			pen.new_text( pic_x, pic_y, pen.LAYERS.WORLD_UI, txt, { is_centered_x = true, color = pen.PALETTE.VNL.YELLOW })
 		end
 	elseif( not( GameHasFlagRun( "KAPPA_IS_ACTIVE" ))) then
 		local p_x, p_y = DEBUG_GetMouseWorld()
@@ -414,9 +408,11 @@ function OnWorldPreUpdate()
 				EntitySetTransform( target_entity, EntityGetTransform( hooman ))
 			end
 		end
-	elseif( #( EntityGetWithTag( "kappaed" ) or {} ) == 0 ) then
+	elseif( #( EntityGetWithTag( "kappaed" ) or {}) == 0 ) then
 		GameRemoveFlagRun( "KAPPA_IS_ACTIVE" )
 	end
+
+	pen.gui_builder( true )
 end
 
 function OnPlayerSpawned( hooman ) 

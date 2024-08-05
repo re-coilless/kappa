@@ -429,12 +429,9 @@ end
 
 
 
-local uid, pic_x, pic_y, pic_z = 0, 0, 0, pen.Z_LAYERS.world_ui
-
-local gui = GuiCreate()
-GuiStartFrame( gui )
+local gui = pen.gui_builder()
 local w, h = GuiGetScreenDimensions( gui )
-
+local pic_x, pic_y, pic_z = 0, 0, pen.LAYERS.WORLD_UI
 if( ModSettingGetNextValue( "kappa.SHOW_POINTER" )) then
 	pic_x, pic_y = pen.world2gui( x, y + ComponentGetValue2( hitbox_comp, "aabb_min_y" ) - 10 )
 	local scale_x, scale_y = 1, 1
@@ -473,13 +470,13 @@ if( ModSettingGetNextValue( "kappa.SHOW_POINTER" )) then
 		scale_y = -1
 		pic_y = pic_y + 1.5
 	end
-	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z, pic..".png", { s_x = scale_x, s_y = scale_y })
+	pen.new_image( pic_x - 1.5, pic_y - 1.5, pic_z, pic..".png", { s_x = scale_x, s_y = scale_y })
 end
 
 if( show_aim ) then
 	local drift = math.abs( s_x > 0 and ComponentGetValue2( hitbox_comp, "aabb_max_x" ) or ComponentGetValue2( hitbox_comp, "aabb_min_x" )) + 20
 	pic_x, pic_y = pen.world2gui( x + drift*math.cos( angle ), y + drift*s_y*math.sin( angle ))
-	uid = pen.new_image( gui, uid, pic_x - 1.5, pic_y - 1.5, pic_z - 1, "mods/kappa/files/pics/pointer/"..math.max( kappa_id, 1 ).."pointer.png" )
+	pen.new_image( pic_x - 1.5, pic_y - 1.5, pic_z - 1, "mods/kappa/files/pics/pointer/"..math.max( kappa_id, 1 ).."pointer.png" )
 end
 
 if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
@@ -499,16 +496,16 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 	end
 	
 	local bar_height = is_pinned and 1.5 or 2
-	uid = pen.new_image( gui, uid, pic_x - length/2, pic_y, pic_z - 0.5,
+	pen.new_image( pic_x - length/2, pic_y, pic_z - 0.5,
 		"mods/kappa/files/pics/pixels_white.png", { s_x = length, s_y = bar_height })
-	uid = pen.new_image( gui, uid, pic_x - length/2 + 1, pic_y + bar_height/2, pic_z - 0.6,
+	pen.new_image( pic_x - length/2 + 1, pic_y + bar_height/2, pic_z - 0.6,
 		"mods/kappa/files/pics/pixels_p"..math.max( kappa_id, 1 )..".png", { s_x = ( length - 2 )*percentage, s_y = bar_height/2 })
 	
 	if( #attack_comps > 1 ) then
 		local t_x, t_y = pic_x - ( #attack_comps*2 - 1 )/2, pic_y + 3*bar_height + 1
 		for i = 1,#attack_comps do
 			local this_one = current_gun == i
-			uid = pen.new_image( gui, uid, t_x + 2*( i - 1 ), t_y, pic_z - 0.5,
+			pen.new_image( t_x + 2*( i - 1 ), t_y, pic_z - 0.5,
 				"mods/kappa/files/pics/pixels_"..( this_one and "white" or "blue" )..".png", { s_x = 1, s_y = this_one and 4/3 or 1 })
 		end
 	end
@@ -516,7 +513,7 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 	if( ComponentGetValue2( char_comp, "flying_needs_recharge" )) then
 		local perc = ComponentGetValue2( char_comp, "mFlyingTimeLeft" )/ComponentGetValue2( char_comp, "fly_time_max" )
 		if( perc < 0.99 ) then
-			uid = pen.new_image( gui, uid, pic_x - ( length/2 + 3 ), pic_y + 3*bar_height, pic_z - 0.45,
+			pen.new_image( pic_x - ( length/2 + 3 ), pic_y + 3*bar_height, pic_z - 0.45,
 				"mods/kappa/files/pics/pixels_blue.png", { s_x = length + 6, s_y = -bar_height*perc })
 		end
 	end
@@ -530,10 +527,10 @@ if( ModSettingGetNextValue( "kappa.SHOW_UI" )) then
 		local reload_frames = math.max( ComponentGetValue2( abil_comp, "mReloadNextFrameUsable" ) - frame_num, 0 )
 		local full_frame = math.min(( is_pinned and 3 or 1 )*math.ceil( mana_perc*mana_frames + delay_frames + reload_frames )/10, length - 4 )
 		if( full_frame > 1 ) then
-			uid = pen.new_image( gui, uid, pic_x - full_frame/2, pic_y - ( is_pinned and 2 or 0 ), pic_z - 0.55,
+			pen.new_image( pic_x - full_frame/2, pic_y - ( is_pinned and 2 or 0 ), pic_z - 0.55,
 				"mods/kappa/files/pics/pixels_blue.png", { s_x = full_frame, s_y = is_pinned and 1.5 or 2 })
 		end
 	end
 end
 
-GuiDestroy( gui )
+pen.gui_builder( true )
