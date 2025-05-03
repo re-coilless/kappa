@@ -101,7 +101,7 @@ if( is_coop ) then
 				end
 			end
 		else
-			local core_x, core_y = pen.get_creature_centre( entity_id, x, y )
+			local core_x, core_y = pen.get_creature_centre( entity_id )
 			local money = EntityGetInRadiusWithTag( core_x, core_y, 10, "gold_nugget" ) or {}
 			for i,gold in ipairs( money ) do
 				EntitySetTransform( gold, player_x, player_y )
@@ -141,7 +141,7 @@ local storage_angle = pen.magic_storage( entity_id, "kappa_angle" )
 local angle = ComponentGetValue2( storage_angle, "value_float" )
 if( aim[2] ~= 0 or controller_moment ) then
 	if( controller_moment ) then
-		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, math.atan2( aim[2], aim[1]), autoaim, gonna_shoot, aim_data )
+		angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id )}, math.atan2( aim[2], aim[1]), autoaim, gonna_shoot, aim_data )
 	else
 		angle = math.max( math.min( angle - ( aim[2] < 0 and 1 or -1 )*a_speed, a_limit ), -a_limit )
 	end
@@ -156,7 +156,7 @@ local aim_sign = input_memo[ entity_id ] and 1 or s_x
 local a_vector = { aim_sign*math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
 angle = math.atan2( a_vector[2], a_vector[1])
 if( not( controller_moment ) and autoaim ) then
-	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id, x, y )}, angle, autoaim, gonna_shoot, aim_data )
+	angle = mnee.aim_assist( entity_id, {pen.get_creature_centre( entity_id )}, angle, autoaim, gonna_shoot, aim_data )
 	a_vector = { math.cos( angle )*a_dist, s_y*math.sin( angle )*a_dist }
 end
 ComponentSetValue2( ctrl_comp, "mAimingVector", a_vector[1], a_vector[2] )
