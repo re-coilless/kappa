@@ -63,7 +63,7 @@ local mod_id = "kappa"..( kappa_id > 1 and ":p"..( kappa_id + 1 ) or "" )
 
 local ctrl_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "ControlsComponent" )
 ComponentSetValue2( ctrl_comp, "mButtonDownRun", true )
-local axis_state = mnee.mnin( "stick", {mod_id,"movement"}, {dirty=true})
+local axis_state = mnee.mnin( "stick", { mod_id, "movement" }, { dirty = true })
 local move_left, move_right = axis_state[1] < 0, axis_state[1] > 0
 ComponentSetValue2( ctrl_comp, "mButtonDownLeft", move_left )
 ComponentSetValue2( ctrl_comp, "mButtonDownRight", move_right )
