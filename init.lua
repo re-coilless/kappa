@@ -12,14 +12,14 @@ function OnModInit()
 end
 
 function OnWorldPreUpdate()
+	if( not( ModIsEnabled( "mnee" ))) then
+		GamePrint( "[M-NEE IS REQUIRED] - check the mod's page" )
+		return
+	end
+
 	dofile_once( "mods/mnee/lib.lua" )
 	dofile_once( "data/scripts/lib/utilities.lua" )
 	dofile_once( "mods/kappa/incompatibility.lua" )
-	
-	if( not( ModIsEnabled( "mnee" ))) then
-		GamePrint( "[M-NEE IS REQUIRED] - check steam page description" )
-		return pen.gui_builder( false )
-	end
 	
 	local hooman = pen.get_hooman()
 	if( not( pen.vld( hooman, true ))) then return pen.gui_builder( false ) end
