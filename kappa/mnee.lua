@@ -1,22 +1,33 @@
 for i = 1,4 do
 	local is_main = i == 1
-	if( not( is_main )) then
+	if( is_main ) then
+		_MNEEDATA[ "kappa" ] = {
+			name = "KAPPA",
+			desc = "General KAPPA binds.",
+		}
+	else
 		_MNEEDATA[ "kappa:p"..( i + 1 )] = {
 			id = i,
 			is_hidden = function( mod_id, jpads )
 				return jpads[ _MNEEDATA[ mod_id ].id ] == -1
 			end,
+
+			name = "KAPPA P"..( i + 1 ),
+			desc = "Controls for player #"..( i + 1 )..".",
 		}
 	end
+	
 	_BINDINGS[ "kappa"..( is_main and "" or ":p"..( i + 1 ))] = {
 		rally = is_main and {
 			order_id = "!a",
+			is_weak = true,
 			name = "Rally",
 			desc = "Teleports all secondary players to the primary (does not work in PvP mode).",
 			keys = { x = 1, },
 		} or nil,
 		spawn = {
 			order_id = "!b",
+			is_weak = true,
 			name = "Spawn",
 			desc = "Use this to create an additional player character.",
 			keys = {[ i.."gpd_a" ] = 1, },
@@ -68,6 +79,7 @@ for i = 1,4 do
 		},
 		halt_autoaim = {
 			order_id = "ac",
+			is_weak = true,
 			name = "Halt Autoaim",
 			desc = "Stops aim assists from messing up the inputs while is held.",
 			keys = {[ i.."gpd_r1" ] = 1, },
@@ -76,6 +88,7 @@ for i = 1,4 do
 		
 		next_gun = {
 			order_id = "ba",
+			is_weak = true,
 			name = "Next Attack",
 			desc = "Switches between ranged attack modes, assuming there're many or any.",
 			keys = {[ i.."gpd_right" ] = 1, },
@@ -83,6 +96,7 @@ for i = 1,4 do
 		},
 		previous_gun = {
 			order_id = "bb",
+			is_weak = true,
 			name = "Previous Attack",
 			desc = "Switches between ranged attack modes, assuming there're many or any.",
 			keys = {[ i.."gpd_left" ] = 1, },
@@ -105,6 +119,7 @@ for i = 1,4 do
 		
 		drop = {
 			order_id = "ca",
+			is_weak = true,
 			name = "Drop/Pick Up",
 			desc = "Creature will drop currently held wand/pick up wand from the floor.",
 			keys = {[ i.."gpd_y" ] = 1, },
@@ -112,6 +127,7 @@ for i = 1,4 do
 		},
 		suicide = {
 			order_id = "cb",
+			is_weak = true,
 			name = "Suicide",
 			desc = "Creature will die from \"natural\" causes.",
 			keys = {[ i.."gpd_b" ] = 1, },

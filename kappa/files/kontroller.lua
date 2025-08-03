@@ -63,7 +63,7 @@ local mod_id = "kappa"..( kappa_id > 1 and ":p"..( kappa_id + 1 ) or "" )
 
 local ctrl_comp = EntityGetFirstComponentIncludingDisabled( entity_id, "ControlsComponent" )
 ComponentSetValue2( ctrl_comp, "mButtonDownRun", true )
-local axis_state = mnee.mnin( "stick", { mod_id, "movement" }, { dirty = true })
+local axis_state = mnee.mnin( "stick", { mod_id, "movement" })
 local move_left, move_right = axis_state[1] < 0, axis_state[1] > 0
 ComponentSetValue2( ctrl_comp, "mButtonDownLeft", move_left )
 ComponentSetValue2( ctrl_comp, "mButtonDownRight", move_right )
@@ -82,7 +82,7 @@ if( is_coop ) then
 	local hooman = EntityGetClosestWithTag( x, y, "player_unit" ) or 0
 	if( hooman > 0 ) then
 		local player_x, player_y = EntityGetTransform( hooman )
-		if( mnee.mnin( "bind", {"kappa","rally"}, {pressed=true,dirty=true})) then
+		if( mnee.mnin( "bind", { "kappa", "rally" }, { pressed = true })) then
 			EntityLoad( "data/entities/particles/teleportation_source.xml", x, y )
 			EntityLoad( "data/entities/particles/teleportation_target.xml", player_x, player_y )
 			EntitySetTransform( entity_id, player_x, player_y )
@@ -117,7 +117,7 @@ local a_dist = 100
 local a_speed = math.rad( ModSettingGetNextValue( "kappa.AIM_SPEED" ))
 local a_limit = math.rad( 85 )
 
-local aim,_,is_buttoned = mnee.mnin( "stick", {mod_id,"aim"}, {dirty=true})
+local aim,_,is_buttoned = mnee.mnin( "stick", { mod_id, "aim" })
 local controller_moment = not( is_buttoned[1] and is_buttoned[2])
 if( plat_comp ~= nil ) then
 	if( aim[2] ~= 0 or move_left or move_right or controller_moment ) then
@@ -126,8 +126,8 @@ if( plat_comp ~= nil ) then
 	end
 end
 
-local gonna_shoot = mnee.mnin( "bind", {mod_id,"shoot"}, {dirty=true})
-local gonna_melee = mnee.mnin( "bind", {mod_id,"melee"}, {dirty=true})
+local gonna_shoot = mnee.mnin( "bind", { mod_id, "shoot" })
+local gonna_melee = mnee.mnin( "bind", { mod_id, "melee" })
 
 local show_aim = ModSettingGetNextValue( "kappa.SHOW_AIM" )
 local aim_data = {
@@ -136,7 +136,7 @@ local aim_data = {
 	-- do_lining = true,
 }
 local has_weapon = wand_in_hand > 0 or ComponentGetValue2( ai_comp, "attack_ranged_enabled" ) or attack_comp ~= nil
-local autoaim = has_weapon and ModSettingGetNextValue( "kappa.AUTOAIM" ) and not( mnee.mnin( "bind", {mod_id,"halt_autoaim"}, {dirty=true}))
+local autoaim = has_weapon and ModSettingGetNextValue( "kappa.AUTOAIM" ) and not( mnee.mnin( "bind", { mod_id,"halt_autoaim" }))
 local storage_angle = pen.magic_storage( entity_id, "kappa_angle" )
 local angle = ComponentGetValue2( storage_angle, "value_float" )
 if( aim[2] ~= 0 or controller_moment ) then
@@ -162,8 +162,8 @@ end
 ComponentSetValue2( ctrl_comp, "mAimingVector", a_vector[1], a_vector[2] )
 ComponentSetValue2( ctrl_comp, "mMousePosition", a_vector[1]*1000, a_vector[2]*1000 )
 
-local next_gun = mnee.mnin( "bind", {mod_id,"next_gun"}, {pressed=true,dirty=true})
-local previous_gun = mnee.mnin( "bind", {mod_id,"previous_gun"}, {pressed=true,dirty=true})
+local next_gun = mnee.mnin( "bind", { mod_id, "next_gun" }, { pressed = true })
+local previous_gun = mnee.mnin( "bind", { mod_id, "previous_gun" }, { pressed = true })
 if( next_gun or previous_gun ) then
 	current_gun = current_gun + ( next_gun and 1 or -1 )
 	if( current_gun < 1 ) then
@@ -382,7 +382,7 @@ elseif( timer > 10 ) then
 		EntitySetComponentIsEnabled( entity_id, hands_comp, false )
 	end
 end
-if( mnee.mnin( "bind", {mod_id,"drop"}, {pressed=true,dirty=true})) then
+if( mnee.mnin( "bind", { mod_id, "drop" }, { pressed = true })) then
 	aim_assist_korrection = nil
 	GameDropAllItems( entity_id )
 	if( hands_comp ~= nil ) then
@@ -409,7 +409,7 @@ if( kappa_id == 0 ) then
 			return
 		end
 	else
-		if( mnee.mnin( "bind", {mod_id,"suicide"}, {pressed=true,dirty=true})) then
+		if( mnee.mnin( "bind", { mod_id, "suicide" }, { pressed = true })) then
 			if( is_coop and hands_comp ~= nil ) then ComponentSetValue2( hands_comp, "drop_items_on_death", false ) end
 			EntityRemoveComponent( entity_id, EntityGetFirstComponentIncludingDisabled( entity_id, "PlatformShooterPlayerComponent" ))
 			
