@@ -82,7 +82,7 @@ if( is_coop ) then
 	local hooman = EntityGetClosestWithTag( x, y, "player_unit" ) or 0
 	if( hooman > 0 ) then
 		local player_x, player_y = EntityGetTransform( hooman )
-		if( mnee.mnin( "bind", { "kappa", "rally" }, { pressed = true })) then
+		if( mnee.mnin( "bind", { mod_id, "rally" }, { pressed = true })) then
 			EntityLoad( "data/entities/particles/teleportation_source.xml", x, y )
 			EntityLoad( "data/entities/particles/teleportation_target.xml", player_x, player_y )
 			EntitySetTransform( entity_id, player_x, player_y )
@@ -410,7 +410,8 @@ if( kappa_id == 0 ) then
 		end
 	else
 		if( mnee.mnin( "bind", { mod_id, "suicide" }, { pressed = true })) then
-			if( is_coop and hands_comp ~= nil ) then ComponentSetValue2( hands_comp, "drop_items_on_death", false ) end
+			if( is_coop and hands_comp ~= nil ) then
+				ComponentSetValue2( hands_comp, "drop_items_on_death", false ) end
 			EntityRemoveComponent( entity_id, EntityGetFirstComponentIncludingDisabled( entity_id, "PlatformShooterPlayerComponent" ))
 			
 			EntityInflictDamage( entity_id, 9999999, "DAMAGE_SLICE", "GET KAPPAED LOL", "BLOOD_EXPLOSION", 0, 0, entity_id, x, y, 0 )

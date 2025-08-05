@@ -1,30 +1,24 @@
 for i = 1,4 do
 	local is_main = i == 1
-	if( is_main ) then
-		_MNEEDATA[ "kappa" ] = {
-			name = "KAPPA",
-			desc = "General KAPPA binds.",
-		}
-	else
-		_MNEEDATA[ "kappa:p"..( i + 1 )] = {
-			id = i,
-			is_hidden = function( mod_id, jpads )
-				return jpads[ _MNEEDATA[ mod_id ].id ] == -1
-			end,
+	_MNEEDATA[ "kappa"..( is_main and "" or ":p"..( i + 1 ))] = {
+		id = i,
+		is_hidden = not( is_main ) and function( mod_id, jpads )
+			return jpads[ _MNEEDATA[ mod_id ].id ] == -1
+		end or nil,
 
-			name = "KAPPA P"..( i + 1 ),
-			desc = "Controls for player #"..( i + 1 )..".",
-		}
-	end
+		order_id = 100 + i,
+		name = "KAPPA P"..( i + 1 ),
+		desc = "Controls for player #"..( i + 1 )..".",
+	}
 	
 	_BINDINGS[ "kappa"..( is_main and "" or ":p"..( i + 1 ))] = {
-		rally = is_main and {
+		rally = {
 			order_id = "!a",
 			is_weak = true,
 			name = "Rally",
-			desc = "Teleports all secondary players to the primary (does not work in PvP mode).",
-			keys = { x = 1, },
-		} or nil,
+			desc = "Teleports the player to the host (does not work in PvP mode).",
+			keys = {[ i.."gpd_down" ] = 1, },
+		},
 		spawn = {
 			order_id = "!b",
 			is_weak = true,
