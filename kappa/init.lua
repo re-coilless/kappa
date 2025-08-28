@@ -47,7 +47,7 @@ function OnWorldPreUpdate()
 			local is_alive = GameHasFlagRun( core_flag )
 			if( GameHasFlagRun( spawn_ban )) then
 				if( wanna_spawn and not( is_alive )) then
-					mnee.play_sound( "error" )
+					pen.play_sound( pen.TUNES.PRSP.ERROR )
 					GamePrint( "PICK UP TEMPLE HEART TO RESPAWN" )
 				end
 			elseif( not( is_alive )) then
